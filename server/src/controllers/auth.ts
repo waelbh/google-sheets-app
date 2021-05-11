@@ -41,8 +41,8 @@ export const getUserToken = async (req: any, res: any) => {
 
     res.cookie(COOKIE_NAME, token, {
       maxAge: 900000,
-      httpOnly: false,
-      secure: false,
+      httpOnly: process.env.NODE_ENV === "production" ? true : false,
+      secure: process.env.NODE_ENV === "production" ? true : false,
     });
     res.redirect(CLIENT_ROOT_URI);
   } catch (error) {
