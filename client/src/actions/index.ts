@@ -15,8 +15,13 @@ export const getSheetsList = async () => {
 };
 
 export const updateDeduplicationSheets = async (id: string) => {
-    const resp = await axios.get(`/sheets/deduplication_updater?id=${id}`, {
-        withCredentials: true,
-    });
-    return resp.data;
+    let resp;
+    try {
+        resp = await axios.get(`/sheets/deduplication_updater?id=${id}`, {
+            withCredentials: true,
+        });
+        return await resp.data;
+    } catch (error) {
+        resp = false;
+    }
 };

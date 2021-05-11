@@ -8,13 +8,11 @@ interface Prop {
 const SelectSheetsForm: React.FC<Prop> = (prop) => {
     const { options, handleDeduplicateAction } = prop;
     const [selectedSpreadSheetId, setSelectedSpreadSheetId] = useState<string>('');
-    const handleDeduplicate = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        handleDeduplicateAction(e, selectedSpreadSheetId);
-    };
+
     return (
         <Container className="content">
             <Header inverted as="h2">
-                Select Spreadsheets to deduplicate their Data
+                Select spreadsheets to deduplicate their Data
             </Header>
             <div>
                 <Form size="massive">
@@ -31,11 +29,14 @@ const SelectSheetsForm: React.FC<Prop> = (prop) => {
                             setSelectedSpreadSheetId(value);
                         }}
                     />
+
                     <Button
                         type="submit"
                         size="huge"
                         disabled={selectedSpreadSheetId ? false : true}
-                        onClick={handleDeduplicate}
+                        onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                            handleDeduplicateAction(e, selectedSpreadSheetId);
+                        }}
                     >
                         Deduplicate
                     </Button>

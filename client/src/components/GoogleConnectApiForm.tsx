@@ -4,7 +4,7 @@ import { Button, Container, Header } from 'semantic-ui-react';
 interface Prop {
     handleConnectApi: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
-const GoogleConnectApiForm: React.FC<Prop> = prop => {
+const GoogleConnectApiForm: React.FC<Prop> = (prop) => {
     const { handleConnectApi } = prop;
 
     return (
@@ -13,8 +13,8 @@ const GoogleConnectApiForm: React.FC<Prop> = prop => {
                 Explore your google sheets
             </Header>
             <p>
-                Google sheets app will explore and handle Data deduplication on your spreadsheets, First we need`&apos;`
-                your google Authentification and Authorization and you're ready to go!
+                Google sheets app will explore and handle Data deduplication on your spreadsheets, First we need your
+                google Authentification and Authorization and you're ready to go!
             </p>
 
             <Button size="huge" onClick={handleConnectApi}>

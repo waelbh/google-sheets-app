@@ -1,6 +1,6 @@
-import { google } from "googleapis";
+import { google, sheets_v4 } from "googleapis";
 import { arrayOfArrayStringsToArrayOfObjects } from "../helpers";
-import _ from "lodash";
+import _, { isError } from "lodash";
 /**
  *
  * Get all user spreadsheet from the drive
@@ -39,14 +39,8 @@ export const sheetsDeduplicationUpdater = async (
     const { id } = request.query;
     const sheets = google.sheets({ version: "v4", auth: request.oAuth2Client });
 
-    const DataTabA = await sheets.spreadsheets.values.get({
-      spreadsheetId: id,
-      range: "A",
-    });
-    const DataTabB = await sheets.spreadsheets.values.get({
-      spreadsheetId: id,
-      range: "B",
-    });
+    const DataTabA = await getSheetsByTab("A", id, sheets);
+    const DataTabB = await getSheetsByTab("B", id, sheets);
 
     const AobjectArray = arrayOfArrayStringsToArrayOfObjects(
       DataTabA.data.values
@@ -71,7 +65,7 @@ export const sheetsDeduplicationUpdater = async (
       AobjectArray,
       "firstName" && "lastName" && "email"
     ).map((obj: any) => {
-      const matchObject: object | undefined | number = _.find(AobjectArray, {
+      const matchObject = _.find(AobjectArray, {
         firstName: obj.firstName,
         lastName: obj.lastName,
         email: obj.email,
@@ -91,7 +85,7 @@ export const sheetsDeduplicationUpdater = async (
       size: 0,
       keysArrayCell: [],
     };
-    //gettintf Tab keys
+    //getting Tab keys
     let rows = resultTabC.map((elem, index) => {
       if (_.size(elem) > allkeys.size) {
         allkeys.size = _.size(elem);
@@ -100,23 +94,50 @@ export const sheetsDeduplicationUpdater = async (
       return Object.values(elem);
     });
 
-    let values: string[][] = [[...allkeys.keysArrayCell], ...rows];
-    await sheets.spreadsheets.values.update(
-      {
-        spreadsheetId: id,
-        range: "C!A1:F", // update this range of cells
-        valueInputOption: "RAW",
-
-        requestBody: { values: values },
-      },
-      (err: any, res: any) => {
-        if (err) {
-          return response.status(400).json(err);
-        }
-        return response.status(200).json(res);
-      }
+    const TabCRows: string[][] = [[...allkeys.keysArrayCell], ...rows];
+    return await updateSpreadSheetTabC(
+      "C!A1:F",
+      id,
+      sheets,
+      "RAW",
+      { values: TabCRows },
+      response
     );
   } catch (error) {
-    return response.status(400).json(error);
+    return response.sendStatus(400);
   }
+};
+const getSheetsByTab = async (
+  range: string,
+  spreadsheetId: string,
+  sheets: sheets_v4.Sheets
+) => {
+  return await sheets.spreadsheets.values.get({
+    spreadsheetId: spreadsheetId,
+    range: range,
+  });
+};
+const updateSpreadSheetTabC = async (
+  range: string,
+  spreadsheetId: string,
+  sheets: sheets_v4.Sheets,
+  valueInputOption: string,
+  requestBody: Object,
+  response: any
+) => {
+  await sheets.spreadsheets.values.update(
+    {
+      spreadsheetId: spreadsheetId,
+      range: range, // update this range of cells
+      valueInputOption: valueInputOption,
+
+      requestBody: requestBody,
+    },
+    (err: any, res: any) => {
+      if (err) {
+        return response.status(400).json(err);
+      }
+      return response.status(200).json(res);
+    }
+  );
 };
